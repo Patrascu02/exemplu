@@ -26,7 +26,7 @@ namespace exemplu.Controllers
             return View(await context.ToListAsync());
         }
 
-        // GET: CONCURENTs/Details/5
+        
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -47,7 +47,7 @@ namespace exemplu.Controllers
             return View(cONCURENT);
         }
 
-        // GET: CONCURENTs/Create
+        
         public IActionResult Create()
         {
             ViewData["CONCURSId"] = new SelectList(_context.CONCURSURI, "Id", "Categorie");
@@ -56,9 +56,7 @@ namespace exemplu.Controllers
 
         }
 
-        // POST: CONCURENTs/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nume,Prenume,DataNasterii,Tara,Varsta,CONCURSId")] CONCURENT concurent)
@@ -109,7 +107,6 @@ namespace exemplu.Controllers
 
         }
 
-        // GET: CONCURENTs/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -126,9 +123,7 @@ namespace exemplu.Controllers
             return View(cONCURENT);
         }
 
-        // POST: CONCURENTs/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Nume,Prenume,DataNasterii,Tara,Varsta,CONCURSId")] CONCURENT cONCURENT)
@@ -162,7 +157,7 @@ namespace exemplu.Controllers
             return View(cONCURENT);
         }
 
-        // GET: CONCURENTs/Delete/5
+        
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -181,7 +176,7 @@ namespace exemplu.Controllers
             return View(cONCURENT);
         }
 
-        // POST: CONCURENTs/Delete/5
+        
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

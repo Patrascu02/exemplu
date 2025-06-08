@@ -39,7 +39,7 @@ namespace exemplu.Models
                 entity.Property(entity => entity.Varsta).HasColumnType("int").IsRequired();
                 
                 
-                // Foreign key relationship
+               
                 entity.HasOne(e => e.CONCURS)
                     .WithMany(c => c.CONCURENTI)
                     .HasForeignKey(e => e.CONCURSId)
