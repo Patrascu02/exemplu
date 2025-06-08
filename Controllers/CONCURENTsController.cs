@@ -64,15 +64,6 @@ namespace exemplu.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nume,Prenume,DataNasterii,Tara,Varsta,CONCURSId")] CONCURENT concurent)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(concurent);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-
-
-
             // 1. Obține concursul asociat
             var concurs = await _context.CONCURSURI
                 .Include(c => c.CONCURENTI)
@@ -84,35 +75,31 @@ namespace exemplu.Controllers
                 return View(concurent);
             }
 
-
-            
-
-            System.Diagnostics.Debug.WriteLine("=============================================================================");
             // 2. Verifică dacă s-a atins numărul maxim de participanți
             if (concurs.CONCURENTI.Count() >= concurs.nr_max_participanti)
             {
                 ModelState.AddModelError("", "Numărul maxim de participanți a fost atins pentru acest concurs.");
-                return View(concurent);
             }
 
-
+            // 3. Verifică restricția de vârstă
             Debug.WriteLine($"Varsta primita: {concurent.Varsta}");
-
-
-            // 3. Verifică dacă există restricție de vârstă și concurentul este minor (< 18)
             if (concurs.restrictie_varsta == true && concurent.Varsta < 18)
             {
                 ModelState.AddModelError("", "Concurenții minori nu pot participa la acest concurs.");
-                return View(concurent);
             }
 
-            // 4. Salvează concurentul
-            _context.Add(concurent);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            // 4. Salvează concurentul doar dacă ModelState este valid
+            if (ModelState.IsValid)
+            {
+                _context.Add(concurent);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
 
-
+            // Dacă ModelState nu e valid, se revine la View cu erori
+            return View(concurent);
         }
+
 
         // GET: CONCURENTs/Edit/5
         public async Task<IActionResult> Edit(int? id)
