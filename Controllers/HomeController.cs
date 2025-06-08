@@ -72,36 +72,36 @@ namespace exemplu.Controllers
 
 
 
-            // 1. Ob?ine concursul asociat
+            // 1. Obtine concursul asociat
             var concurs = await _context.CONCURSURI
                 .Include(c => c.CONCURENTI)
                 .FirstOrDefaultAsync(c => c.Id == concurent.CONCURSId);
 
             if (concurs == null)
             {
-                ModelState.AddModelError("", "Concursul selectat nu exist?.");
+                ModelState.AddModelError("", "Concursul selectat nu exista.");
                 return View(concurent);
             }
 
 
             Debug.WriteLine(concurs.CONCURENTI.Count());
-            // 2. Verific? dac? s-a atins num?rul maxim de participan?i
+            // 2. Verifica daca s-a atins numarul maxim de participanti
             if (concurs.CONCURENTI.Count() >= concurs.nr_max_participanti)
             {
-                ModelState.AddModelError("", "Num?rul maxim de participan?i a fost atins pentru acest concurs.");
+                ModelState.AddModelError("", "Numarul maxim de participanti a fost atins pentru acest concurs.");
                 return View(concurent);
             }
 
 
             Debug.WriteLine(concurs.restrictie_varsta);
-            // 3. Verific? dac? exist? restric?ie de vârst? ?i concurentul este minor (< 18)
+            // 3. Verifica daca exista restrictie de varsta si concurentul este minor (< 18)
             if (concurs.restrictie_varsta == true && concurent.Varsta < 18)
             {
-                ModelState.AddModelError("", "Concuren?ii minori nu pot participa la acest concurs.");
+                ModelState.AddModelError("", "Concurentii minori nu pot participa la acest concurs.");
                 return View(concurent);
             }
 
-            // 4. Salveaz? concurentul
+            // 4. Salveaza concurentul
             _context.Add(concurent);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

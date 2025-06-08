@@ -64,31 +64,31 @@ namespace exemplu.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nume,Prenume,DataNasterii,Tara,Varsta,CONCURSId")] CONCURENT concurent)
         {
-            // 1. Obține concursul asociat
+            // 1. Obtine concursul asociat
             var concurs = await _context.CONCURSURI
                 .Include(c => c.CONCURENTI)
                 .FirstOrDefaultAsync(c => c.Id == concurent.CONCURSId);
 
             if (concurs == null)
             {
-                ModelState.AddModelError("", "Concursul selectat nu există.");
+                ModelState.AddModelError("", "Concursul selectat nu exista.");
                 return View(concurent);
             }
 
-            // 2. Verifică dacă s-a atins numărul maxim de participanți
+            // 2. Verifica daca s-a atins numarul maxim de participanti
             if (concurs.CONCURENTI.Count() >= concurs.nr_max_participanti)
             {
-                ModelState.AddModelError("", "Numărul maxim de participanți a fost atins pentru acest concurs.");
+                ModelState.AddModelError("", "Numarul maxim de participanti a fost atins pentru acest concurs.");
             }
 
-            // 3. Verifică restricția de vârstă
+            // 3. Verifica restrictia de varsta
             Debug.WriteLine($"Varsta primita: {concurent.Varsta}");
             if (concurs.restrictie_varsta == true && concurent.Varsta < 18)
             {
-                ModelState.AddModelError("", "Concurenții minori nu pot participa la acest concurs.");
+                ModelState.AddModelError("", "Concurentii minori nu pot participa la acest concurs.");
             }
 
-            // 4. Salvează concurentul doar dacă ModelState este valid
+            // 4. Salveaza concurentul doar daca ModelState este valid
             if (ModelState.IsValid)
             {
                 _context.Add(concurent);
@@ -96,7 +96,7 @@ namespace exemplu.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Dacă ModelState nu e valid, se revine la View cu erori
+            // Daca ModelState nu e valid, se revine la View cu erori
             return View(concurent);
         }
 
