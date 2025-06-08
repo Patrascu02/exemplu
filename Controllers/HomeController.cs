@@ -1,4 +1,4 @@
-using exemplu.Models;
+﻿using exemplu.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -56,56 +56,54 @@ namespace exemplu.Controllers
 
         }
 
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nume,Prenume,DataNasterii,Tara,Varsta,CONCURSId")] CONCURENT concurent)
+        public async Task<IActionResult> Create([Bind("Id,Nume,Prenume,Tara,Varsta,CONCURSId")] CONCURENT concurent)
         {
+           
+            concurent.DataNasterii = DateTime.Now;
+
             if (ModelState.IsValid)
             {
+                // Obtine concursul asociat
+                var concurs = await _context.CONCURSURI
+                    .Include(c => c.CONCURENTI)
+                    .FirstOrDefaultAsync(c => c.Id == concurent.CONCURSId);
+
+                if (concurs == null)
+                {
+                    ModelState.AddModelError("", "Concursul selectat nu exista.");
+                    ViewData["CONCURSId"] = new SelectList(_context.CONCURSURI, "Id", "Categorie", concurent.CONCURSId);
+                    return View(concurent);
+                }
+
+                
+                if (concurs.CONCURENTI.Count() >= concurs.nr_max_participanti)
+                {
+                    ModelState.AddModelError("", "Nr maxim de participanti a fost atins pentru acest concurs.");
+                    ViewData["CONCURSId"] = new SelectList(_context.CONCURSURI, "Id", "Categorie", concurent.CONCURSId);
+                    return View(concurent);
+                }
+
+                
+                if (concurs.restrictie_varsta == true && concurent.Varsta < 18)
+                {
+                    ModelState.AddModelError("", "Concurentii minori nu pot participa la acest concurs.");
+                    ViewData["CONCURSId"] = new SelectList(_context.CONCURSURI, "Id", "Categorie", concurent.CONCURSId);
+                    return View(concurent);
+                }
+
+                // Salveaz concurentul
                 _context.Add(concurent);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
 
-
-
-            // 1. Obtine concursul asociat
-            var concurs = await _context.CONCURSURI
-                .Include(c => c.CONCURENTI)
-                .FirstOrDefaultAsync(c => c.Id == concurent.CONCURSId);
-
-            if (concurs == null)
-            {
-                ModelState.AddModelError("", "Concursul selectat nu exista.");
-                return View(concurent);
-            }
-
-
-            Debug.WriteLine(concurs.CONCURENTI.Count());
-            // 2. Verifica daca s-a atins numarul maxim de participanti
-            if (concurs.CONCURENTI.Count() >= concurs.nr_max_participanti)
-            {
-                ModelState.AddModelError("", "Numarul maxim de participanti a fost atins pentru acest concurs.");
-                return View(concurent);
-            }
-
-
-            Debug.WriteLine(concurs.restrictie_varsta);
-            // 3. Verifica daca exista restrictie de varsta si concurentul este minor (< 18)
-            if (concurs.restrictie_varsta == true && concurent.Varsta < 18)
-            {
-                ModelState.AddModelError("", "Concurentii minori nu pot participa la acest concurs.");
-                return View(concurent);
-            }
-
-            // 4. Salveaza concurentul
-            _context.Add(concurent);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-
-
+            ViewData["CONCURSId"] = new SelectList(_context.CONCURSURI, "Id", "Categorie", concurent.CONCURSId);
+            return View(concurent);
         }
+
 
         public async Task<IActionResult> Edit(int? id)
         {
@@ -194,6 +192,29 @@ namespace exemplu.Controllers
         private bool CONCURENTExists(int id)
         {
             return _context.CONCURENTI.Any(e => e.Id == id);
+        }
+
+
+        public IActionResult Search(string nume, DateTime? data, string categorie)
+        {
+            var concursuri = _context.CONCURSURI.AsQueryable();
+
+            if (!string.IsNullOrEmpty(nume))
+            {
+                concursuri = concursuri.Where(c => c.Nume.Contains(nume));
+            }
+
+            if (data.HasValue)
+            {
+                concursuri = concursuri.Where(c => c.Data == data.Value.Date);
+            }
+
+            if (!string.IsNullOrEmpty(categorie))
+            {
+                concursuri = concursuri.Where(c => c.Categorie.Contains(categorie));
+            }
+
+            return View(concursuri.ToList());
         }
     }
 }
