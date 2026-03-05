@@ -7,7 +7,7 @@
 
         public string? Nume { get; set; }
 
-        public DateTime? Data { get; set; }//s
+        public DateTime? Data { get; set; }
 
         public string? Categorie { get; set; }
 
